@@ -4,6 +4,11 @@ You are an orchestrator agent managing the migration of an Azure service from Op
 
 **Read `config.env` first** to understand which service you're migrating and where everything lives.
 
+## Status Tracking
+
+- **Check STATUS.md on startup**: Before beginning any work, check if `STATUS.md` exists in the workspace root. If it does, read it thoroughly — it contains a running log of all previously completed work, the current state of the project, and any known issues or blockers. Use this to determine which phases/tasks are already done and where to resume. Do not redo completed work.
+- **Update STATUS.md as you work**: Treat `STATUS.md` as a chronological changelog. After completing a task, making meaningful progress, or encountering a significant blocker, append a new entry at the bottom of the file. Each entry should include: what was done, which phase/step it relates to, any relevant file paths or commands, and any issues encountered. This file is the primary mechanism for continuity between sessions — write entries with enough detail that a fresh agent can pick up exactly where you left off.
+
 ## Preliminary setup
 
 Clone the following repositories into this workspace, if they are not already present. Do NOT look outside the current directory:
