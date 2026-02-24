@@ -1,9 +1,9 @@
 ---
 name: emitter-fixes
-description: Fix root causes of SDK workarounds by making changes to the TypeScript emitter (autorest.typescript) and/or Core packages (azure-sdk-for-js). Use for Phase 5 — eliminating workarounds with proper fixes at the source.
+description: Fix root causes of SDK workarounds by making changes to the TypeScript emitter (autorest.typescript) and/or Core packages (azure-sdk-for-js). Use for Phase 4 — eliminating workarounds with proper fixes at the source.
 ---
 
-# Emitter & Core Fixes (Phase 5)
+# Emitter & Core Fixes (Phase 4)
 
 ## Overview
 Fix the root cause of every workaround in `WORKAROUNDS.md` by making changes to the **emitter** (`autorest.typescript`) and/or **Core** packages (`azure-sdk-for-js`). Workarounds must be fixed at their source — not left as hacks in the SDK.
@@ -12,7 +12,7 @@ Fix the root cause of every workaround in `WORKAROUNDS.md` by making changes to 
 Read `config.env` for paths. You'll work across all three repos.
 
 ## Prerequisites
-- Phase 4 complete (SDK compiling, tests passing with workarounds)
+- Phase 3 complete (SDK compiling, tests passing with workarounds)
 - `WORKAROUNDS.md` populated with root causes and suggested fixes
 
 ## Steps
@@ -54,7 +54,15 @@ For each core workaround:
 After all workarounds are fixed:
 ```bash
 scripts/regen-and-test.sh    # full cycle
-scripts/test-sdk.sh live     # live tests
+scripts/test-sdk.sh live     # live tests — resources must be deployed first
+```
+
+**Note**: Live tests require deployed Azure test resources. Use Azure PowerShell (must already be logged in via `Connect-AzAccount`). Resources can be reused across test runs — deploy once, clean up when done:
+```bash
+pwsh ${SDK_REPO_DIR}/eng/common/TestResources/New-TestResources.ps1 <ServiceDirectory>
+scripts/test-sdk.sh live
+# Clean up when all testing is finished:
+pwsh ${SDK_REPO_DIR}/eng/common/TestResources/Remove-TestResources.ps1 <ServiceDirectory>
 ```
 
 ### 5. Update WORKAROUNDS.md
@@ -75,5 +83,5 @@ scripts/regen-and-test.sh
 ## Completion Criteria
 - All workarounds in `WORKAROUNDS.md` have status "fixed"
 - Fixes are in the emitter or Core — NOT in the SDK convenience layer
-- SDK compiles, all recorded tests pass, all live tests pass
+- SDK compiles, all recorded tests pass, all live tests pass (pre-existing baseline failures excluded)
 - `WORKAROUNDS.md` documents each fix location

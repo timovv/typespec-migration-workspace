@@ -1,9 +1,9 @@
 ---
 name: convenience-layer
-description: Fix the SDK convenience layer to compile and pass all tests after TypeSpec regeneration. Track workarounds in WORKAROUNDS.md with root-cause analysis. Use for Phase 4 of a TypeSpec migration.
+description: Fix the SDK convenience layer to compile and pass all tests after TypeSpec regeneration. Track workarounds in WORKAROUNDS.md with root-cause analysis. Use for Phase 3 of a TypeSpec SDK regeneration.
 ---
 
-# Convenience Layer Patching (Phase 4)
+# Convenience Layer Patching (Phase 3)
 
 ## Overview
 Fix non-generated SDK code (the convenience layer) so the package compiles and all tests pass with the new generated code.
@@ -12,12 +12,12 @@ Fix non-generated SDK code (the convenience layer) so the package compiles and a
 Read `config.env` for paths. Work in the SDK package directory within `azure-sdk-for-js`.
 
 ## Prerequisites
-- Phase 3 complete (TypeSpec customizations applied, SDK regenerated)
+- Phase 2 complete (TypeSpec customizations applied, SDK regenerated)
 - Old generated code in `.generated-backup/` for reference
 
 ## Key Constraints
 - **No unexpected API breaking changes** in review output
-- Changes from `@azure/core-client` → `@azure-rest/core-client` are expected; the `@azure/core-client` dependency should be removed
+- Changes from `@azure/core-client` → `@azure-rest/core-client` are expected; the `@azure/core-client` dependency must be **removed** from the package
 - **Track ALL workarounds** in `WORKAROUNDS.md` with root cause (emitter or Core)
 
 ## Steps
@@ -55,12 +55,19 @@ scripts/test-sdk.sh recorded
 Fix failures: import changes, mock/recording mismatches, type assertions, missing convenience methods.
 
 ### 5. Run Live Tests
+Live tests require Azure test resources. Use the PowerShell scripts in `azure-sdk-for-js` to deploy them. **Azure PowerShell must be installed and you must already be logged in** (`Connect-AzAccount`). Test resources can be reused across multiple test runs — you only need to deploy once, then clean up when completely done.
+
 ```bash
-# Deploy test resources first if needed
-# See azure-sdk-for-js/eng/common/TestResources/New-TestResources.ps1
+# Deploy test resources once (from the SDK repo root)
+pwsh ${SDK_REPO_DIR}/eng/common/TestResources/New-TestResources.ps1 <ServiceDirectory>
+
+# Run live tests (can repeat as needed without redeploying)
 scripts/test-sdk.sh live
+
+# Clean up test resources when all testing is finished
+pwsh ${SDK_REPO_DIR}/eng/common/TestResources/Remove-TestResources.ps1 <ServiceDirectory>
 ```
-Ignore 403/auth errors — those aren't related to your changes.
+All live tests must pass.
 
 ### 6. Document Workarounds
 For EVERY workaround, add to `WORKAROUNDS.md`:
@@ -76,7 +83,7 @@ For EVERY workaround, add to `WORKAROUNDS.md`:
 
 ## Completion Criteria
 - SDK compiles without errors
-- `api-extractor` shows no unexpected API differences
-- All recorded tests pass
-- All live tests pass (auth failures excluded)
+- `api-extractor` shows no unexpected API differences — the review `.api.md` should be essentially unchanged
+- All recorded tests pass (pre-existing baseline failures excluded)
+- All live tests pass (pre-existing baseline failures excluded)
 - All workarounds in `WORKAROUNDS.md` with root cause as emitter or Core

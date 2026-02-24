@@ -1,9 +1,9 @@
 ---
 name: typespec-customization
-description: Apply TypeSpec client customization decorators in client.tsp to minimize API differences between old and new generated SDK code. Use for Phase 3 — iteratively customizing TypeSpec and regenerating until the generated output closely matches the original.
+description: Apply TypeSpec client customization decorators in client.tsp to minimize API differences between old and new generated SDK code. Use for Phase 2 — iteratively customizing TypeSpec and regenerating until the generated output closely matches the original.
 ---
 
-# TypeSpec Customization (Phase 3)
+# TypeSpec Customization (Phase 2)
 
 ## Overview
 Use TypeSpec decorators in `client.tsp` to make the generated SDK match the old code as closely as possible, reducing manual patching needed in Phase 4.
@@ -12,7 +12,7 @@ Use TypeSpec decorators in `client.tsp` to make the generated SDK match the old 
 Read `config.env` for paths. You'll edit TypeSpec in the specs repo and regenerate in the SDK repo.
 
 ## Prerequisites
-- Phase 2 complete (SDK generated, old code backed up)
+- Phase 1 complete (SDK generated, old code backed up)
 - Diff available via `scripts/compare-generated.sh`
 
 ## Reference

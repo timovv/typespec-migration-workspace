@@ -1,9 +1,9 @@
 ---
 name: sdk-generation
-description: Generate the JavaScript SDK from TypeSpec using a local emitter build via tsp-client. Use for Phase 2 of a TypeSpec migration — initial SDK generation and setting up repeatable generation workflow.
+description: Generate the JavaScript SDK from TypeSpec using a local emitter build via tsp-client. Use for Phase 1 of a TypeSpec SDK regeneration — initial SDK generation and setting up repeatable generation workflow.
 ---
 
-# SDK Generation (Phase 2)
+# SDK Generation (Phase 1)
 
 ## Overview
 Generate the JavaScript SDK from TypeSpec using the local emitter, and establish a repeatable regeneration workflow for subsequent phases.
@@ -16,19 +16,22 @@ Read `config.env` for:
 - `SPEC_FULL_PATH` — the TypeSpec source
 
 ## Prerequisites
-- Phase 1 complete (TypeSpec exists and compiles)
+- Specs repo checked out at `SPEC_COMMIT` from `config.env` (TypeSpec already exists and compiles)
 - Emitter built (`scripts/build-emitter.sh`)
 
 ## Steps
 
-### 1. Back Up Old Generated Code
+### 1. Configure Local Emitter Reference
+Update `eng/emitter-package.json` in `azure-sdk-for-js` to reference the local `typespec-ts` emitter build instead of the published npm package. This ensures `tsp-client` uses your local emitter copy for all generation runs. Also check the peer dependencies of the local `typespec-ts` package and update any other packages in `eng/emitter-package.json` to versions that satisfy those peer deps.
+
+### 2. Back Up Old Generated Code
 Before anything, snapshot the current generated code for comparison:
 ```bash
 scripts/backup-generated.sh
 ```
 This copies `src/generated/` to `.generated-backup/`.
 
-### 2. Configure tsp-location.yaml
+### 3. Configure tsp-location.yaml
 The SDK package needs a `tsp-location.yaml` pointing to the TypeSpec. Check if one exists; if not, create it:
 
 ```yaml
@@ -38,7 +41,7 @@ repo: Azure/azure-rest-api-specs
 additionalDirectories: []
 ```
 
-### 3. Generate the SDK
+### 4. Generate the SDK
 ```bash
 scripts/generate-sdk.sh
 ```
@@ -46,14 +49,14 @@ scripts/generate-sdk.sh
 This script runs `tsp-client update` with the local emitter and local spec repo. If it fails:
 - Is the emitter built? → `scripts/build-emitter.sh`
 - Is `tsp-location.yaml` correct?
-- TypeSpec compilation errors? → Go back to Phase 1
+- TypeSpec compilation errors? → Verify specs repo is at the correct commit
 
-### 4. Verify Generation
+### 5. Verify Generation
 - Confirm files were created in `src/generated/`
 - Run `scripts/compare-generated.sh` to see the diff
 - Look for obvious issues (missing operations, wrong types)
 
-### 5. Build the SDK
+### 6. Build the SDK
 ```bash
 scripts/build-sdk.sh
 ```
@@ -62,10 +65,10 @@ The build may fail at this point — that's expected. The goal is to identify wh
 ## Iteration Workflow
 For subsequent phases, use these scripts:
 ```bash
-# After TypeSpec changes (Phase 3)
+# After TypeSpec changes (Phase 2)
 scripts/generate-sdk.sh && scripts/build-sdk.sh
 
-# After emitter changes (Phase 5)
+# After emitter changes (Phase 4)
 scripts/regen-and-test.sh
 
 # To see what changed
