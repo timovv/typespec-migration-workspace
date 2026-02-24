@@ -27,6 +27,8 @@ Use the `scripts/setup-repos.sh` script, or clone manually. After cloning, read 
 
 Before starting any migration work, run **both recorded and live tests** against the existing SDK to establish a baseline. Record which tests (if any) are already failing — these pre-existing failures are allowed to remain after migration. Only regressions (tests that were passing before but fail after) count as failures.
 
+**Both recorded AND live tests are required for the baseline.** Deploy test resources if they aren't already up (Azure PowerShell must be installed and you must already be logged in), then run:
+
 ```bash
 scripts/build-sdk.sh
 scripts/test-sdk.sh recorded   # capture any pre-existing failures

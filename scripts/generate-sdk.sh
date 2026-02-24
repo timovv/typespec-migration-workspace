@@ -14,7 +14,7 @@ cd "$SDK_PACKAGE_FULL_PATH"
 # Run tsp-client update with local emitter and local spec repo
 # Note: --local-spec-repo must point directly to the TypeSpec directory (not the repo root)
 # because tsp-client only resolves the tsp-location.yaml directory in batch mode.
-TYPESPEC_DIR="${SPECS_REPO_DIR}/${SPEC_PATH}/${TYPESPEC_NAMESPACE}"
+TYPESPEC_DIR="${SPECS_REPO_DIR}/${SPEC_PATH}"
 npx tsp-client update \
   --local-spec-repo "$TYPESPEC_DIR" \
   --emitter-package "${EMITTER_FULL_PATH}" \
