@@ -28,7 +28,7 @@ Run `scripts/compare-generated.sh` and categorize differences:
 
 | Category | Example | Fix with |
 |----------|---------|----------|
-| Renamed types/props | `TableItem` → `Table` | `@clientName` |
+| Renamed types/props | `InternalItem` → `Item` | `@clientName` |
 | Missing operations | Op not generated | Check TypeSpec routes |
 | Extra/missing properties | Field differences | Model adjustments |
 | Different type shapes | Union vs enum | TypeSpec model changes |

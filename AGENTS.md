@@ -27,12 +27,28 @@ Use the `scripts/setup-repos.sh` script, or clone manually. After cloning, read 
 
 Before starting any migration work, run **both recorded and live tests** against the existing SDK to establish a baseline. Record which tests (if any) are already failing — these pre-existing failures are allowed to remain after migration. Only regressions (tests that were passing before but fail after) count as failures.
 
-**Both recorded AND live tests are required for the baseline.** Deploy test resources if they aren't already up (Azure PowerShell must be installed and you must already be logged in), then run:
+**Both recorded AND live tests are required for the baseline.**
+
+For **recorded tests**, no special setup is needed — they use mocked/recorded responses:
 
 ```bash
 scripts/build-sdk.sh
 scripts/test-sdk.sh recorded   # capture any pre-existing failures
-scripts/test-sdk.sh live       # deploy test resources first if needed
+```
+
+For **live tests**, you must first deploy test resources to Azure. The deployment provisions the necessary Azure resources and outputs the environment variables that live tests require. Azure PowerShell must be installed and you must already be logged in (`Connect-AzAccount`).
+
+**IMPORTANT: Do NOT skip live tests.** Check for Azure login with `pwsh -Command "Get-AzContext"`. If logged in, deploy test resources and run live tests. The live test baseline is mandatory — without it you cannot verify the migration hasn't introduced regressions. Never assume credentials are unavailable without checking first.
+
+```powershell
+# From the azure-sdk-for-js repo root, deploy test resources for the package:
+eng/common/TestResources/New-TestResources.ps1 <sdk-package-dir>
+```
+
+This script finds and deploys the `test-resources.bicep` template for the service and outputs the required environment variables. You must set them in your shell session before running live tests:
+
+```bash
+scripts/test-sdk.sh live       # requires env vars from test resource deployment
 ```
 
 Save the baseline results in `STATUS.md` so they can be referenced throughout the migration.
@@ -91,6 +107,51 @@ Run a final review subagent to verify all success criteria are met:
 If any criterion is not met, report exactly what failed and what needs to be addressed.
 
 **Completion criteria**: All of the above verified and passing.
+
+### Phase 6: API Surface Verification
+**Repos**: azure-sdk-for-js
+
+After all other phases pass, perform a detailed line-by-line audit of the `.api.md` diff to catch **any** breaking change. This phase exists because it is easy to miss subtle breaks (removed properties, narrowed types, changed response shapes) in a large diff.
+
+**IMPORTANT**: This phase is mandatory. Do NOT skip it. Previous migrations missed breaking changes that were only caught by manual review.
+
+#### Steps
+
+1. **Generate the diff**:
+   ```bash
+   cd azure-sdk-for-js
+   git diff -- ${SDK_PACKAGE_DIR}/review/*.api.md
+   ```
+
+2. **Classify every change** into one of these categories:
+
+   | Category | Example | Action |
+   |----------|---------|--------|
+   | **Expected import change** | `@azure/core-client` → `@azure-rest/core-client` | ✅ Acceptable |
+   | **Removed property** | `clientRequestId?: string` deleted from an interface | ❌ Must restore |
+   | **Removed type** | `KnownSomeStatusType` enum gone | ❌ Must restore |
+   | **Narrowed type** | `string` → `"a" \| "b" \| "c"` | ❌ Must restore as `string` |
+   | **Changed response shape** | `SomeOperationHeaders` → `void` | ❌ Must restore original shape |
+   | **Lost intersection** | `Headers & Body` → `Body` only | ❌ Must restore intersection |
+   | **Added `(undocumented)`** | Missing JSDoc on a public member | ⚠️ Add JSDoc comments |
+   | **`ae-forgotten-export` warning** | Type conflict between generated and local types | ❌ Must fix — define type locally |
+
+3. **Fix every breaking change**:
+   - Restore removed properties and types in `generatedModels.ts` (define them locally — do NOT depend on generated code exporting them)
+   - Restore original response type shapes (composite header+body types)
+   - Keep extensible union types as `string`, not a narrow literal union (e.g., if the TypeSpec defines `union Foo { string, "a", "b" }`, the public API type should remain `string`)
+   - If the generated code exports a type with the same name but different shape, define the type locally to avoid api-extractor `_2` suffix conflicts
+   - Add JSDoc to all public interface members to prevent `(undocumented)` markers
+
+4. **Populate response headers in the convenience layer**:
+   - Operations must extract standard HTTP headers (`x-ms-client-request-id`, `x-ms-request-id`, `x-ms-version`, `date`, `etag`, etc.) from raw responses and include them in return values
+   - Use the header name mappings: `clientRequestId` ← `x-ms-client-request-id`, `requestId` ← `x-ms-request-id`, `version` ← `x-ms-version`, `date` ← `date`, `etag` ← `etag`
+
+5. **Rebuild and re-diff** until the only remaining changes are expected import changes (`CommonClientOptions` → `ClientOptions`, `coreClient.OperationOptions` → `OperationOptions`)
+
+6. **Run both recorded AND live tests** to confirm nothing broke
+
+**Completion criteria**: The `.api.md` diff contains ONLY expected `core-client` → `core-rest-client` import changes. Zero removed properties, zero removed types, zero narrowed types, zero changed response shapes.
 
 ## Subagent Dispatch Pattern
 

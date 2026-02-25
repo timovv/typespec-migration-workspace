@@ -39,7 +39,7 @@ Work through errors systematically:
 2. Adapt to type changes in the convenience layer
 3. For missing functionality — add a workaround AND document it
 
-**IMPORTANT**: Do a full migration of the convenience layer to use the new generated types and APIs directly. Do NOT create compatibility shims, adapter layers, or wrapper classes that re-expose the old AutoRest-generated interface. The convenience layer code (e.g., `TableClient.ts`, `TableServiceClient.ts`, serialization helpers) must be updated to import from and call the new TypeSpec-generated code directly. Old generated types (response headers, mappers, operation interfaces) that no longer exist should be replaced with the new equivalents or defined inline where needed.
+**IMPORTANT**: Do a full migration of the convenience layer to use the new generated types and APIs directly. Do NOT create compatibility shims, adapter layers, or wrapper classes that re-expose the old AutoRest-generated interface. The convenience layer code (e.g., client classes, serialization helpers) must be updated to import from and call the new TypeSpec-generated code directly. Old generated types (response headers, mappers, operation interfaces) that no longer exist should be replaced with the new equivalents or defined inline where needed.
 
 ### 3. Check API Review
 The build produces `*.api.md` review files. Compare against the previous version:

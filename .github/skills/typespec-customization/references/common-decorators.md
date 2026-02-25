@@ -13,7 +13,7 @@ using Azure.ClientGenerator.Core;
 ### `@clientName(name, language?)`
 Rename a type, property, or operation for a specific language client.
 ```typespec
-@@clientName(MyService.InternalTableEntity, "TableEntity");
+@@clientName(MyService.InternalName, "PublicName");
 @@clientName(MyService.Models.prop1, "propertyOne", "javascript");
 ```
 
@@ -58,7 +58,7 @@ Flatten a nested property into its parent.
 ### `@operationGroup`
 Group operations under a named sub-client.
 ```typespec
-@@operationGroup(MyService.TableOperations);
+@@operationGroup(MyService.ItemOperations);
 ```
 
 ### `@exclude`
