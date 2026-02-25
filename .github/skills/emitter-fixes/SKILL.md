@@ -34,7 +34,7 @@ For each emitter workaround:
 4. **Rebuild emitter**: `scripts/build-emitter.sh`
 5. **Regenerate SDK**: `scripts/generate-sdk.sh`
 6. **Remove workaround** from the convenience layer
-7. **Build and test**: `scripts/build-sdk.sh && scripts/test-sdk.sh recorded`
+7. **Build and test**: `scripts/build-sdk.sh && scripts/test-sdk.sh`
 
 Or use the full cycle:
 ```bash
@@ -48,19 +48,18 @@ For each core workaround:
 2. **Make the fix**
 3. **Build** the core package
 4. **Remove workaround** from the convenience layer
-5. **Build and test**: `scripts/build-sdk.sh && scripts/test-sdk.sh recorded`
+5. **Build and test**: `scripts/build-sdk.sh && scripts/test-sdk.sh`
 
 ### 4. Validate Everything
 After all workarounds are fixed:
 ```bash
-scripts/regen-and-test.sh    # full cycle
-scripts/test-sdk.sh live     # live tests — resources must be deployed first
+scripts/regen-and-test.sh    # full cycle (includes recorded + live tests)
 ```
 
 **Note**: Live tests require deployed Azure test resources. Use Azure PowerShell (must already be logged in via `Connect-AzAccount`). Resources can be reused across test runs — deploy once, clean up when done:
 ```bash
 pwsh ${SDK_REPO_DIR}/eng/common/TestResources/New-TestResources.ps1 <ServiceDirectory>
-scripts/test-sdk.sh live
+scripts/test-sdk.sh
 # Clean up when all testing is finished:
 pwsh ${SDK_REPO_DIR}/eng/common/TestResources/Remove-TestResources.ps1 <ServiceDirectory>
 ```

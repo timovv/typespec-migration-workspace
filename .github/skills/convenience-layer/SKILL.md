@@ -48,28 +48,22 @@ find "${SDK_PACKAGE_FULL_PATH}" -name "*.api.md" -path "*/review/*"
 ```
 Only `core-client` → `core-rest-client` migration changes are acceptable.
 
-### 4. Run Recorded Tests
-```bash
-scripts/test-sdk.sh recorded
-```
-Fix failures: import changes, mock/recording mismatches, type assertions, missing convenience methods.
-
-### 5. Run Live Tests
+### 4. Run Tests
 Live tests require Azure test resources. Use the PowerShell scripts in `azure-sdk-for-js` to deploy them. **Azure PowerShell must be installed and you must already be logged in** (`Connect-AzAccount`). Test resources can be reused across multiple test runs — you only need to deploy once, then clean up when completely done.
 
 ```bash
 # Deploy test resources once (from the SDK repo root)
 pwsh ${SDK_REPO_DIR}/eng/common/TestResources/New-TestResources.ps1 <ServiceDirectory>
 
-# Run live tests (can repeat as needed without redeploying)
-scripts/test-sdk.sh live
+# Run tests (recorded first, then live — can repeat as needed without redeploying)
+scripts/test-sdk.sh
 
 # Clean up test resources when all testing is finished
 pwsh ${SDK_REPO_DIR}/eng/common/TestResources/Remove-TestResources.ps1 <ServiceDirectory>
 ```
-All live tests must pass.
+Fix failures: import changes, mock/recording mismatches, type assertions, missing convenience methods. All tests must pass.
 
-### 6. Document Workarounds
+### 5. Document Workarounds
 For EVERY workaround, add to `WORKAROUNDS.md`:
 ```markdown
 ### [Description]

@@ -33,7 +33,7 @@ For **recorded tests**, no special setup is needed — they use mocked/recorded 
 
 ```bash
 scripts/build-sdk.sh
-scripts/test-sdk.sh recorded   # capture any pre-existing failures
+scripts/test-sdk.sh   # runs recorded tests first, then live tests
 ```
 
 For **live tests**, you must first deploy test resources to Azure. The deployment provisions the necessary Azure resources and outputs the environment variables that live tests require. Azure PowerShell must be installed and you must already be logged in (`Connect-AzAccount`).
@@ -45,11 +45,7 @@ For **live tests**, you must first deploy test resources to Azure. The deploymen
 eng/common/TestResources/New-TestResources.ps1 <sdk-package-dir>
 ```
 
-This script finds and deploys the `test-resources.bicep` template for the service and outputs the required environment variables. You must set them in your shell session before running live tests:
-
-```bash
-scripts/test-sdk.sh live       # requires env vars from test resource deployment
-```
+This script finds and deploys the `test-resources.bicep` template for the service and outputs the required environment variables. You must set them in your shell session before running tests.
 
 Save the baseline results in `STATUS.md` so they can be referenced throughout the migration.
 
@@ -99,8 +95,8 @@ Run a final review subagent to verify all success criteria are met:
 
 1. **Build**: SDK compiles without errors (`scripts/build-sdk.sh`)
 2. **API review**: The `.api.md` review file is essentially unchanged from the original (no unexpected API breaks)
-3. **Recorded tests**: All pass (`scripts/test-sdk.sh recorded`), excluding pre-existing baseline failures
-4. **Live tests**: All pass (`scripts/test-sdk.sh live`), excluding pre-existing baseline failures
+3. **Recorded tests**: All pass (`scripts/test-sdk.sh`), excluding pre-existing baseline failures
+4. **Live tests**: All pass (`scripts/test-sdk.sh`), excluding pre-existing baseline failures
 5. **Dependency check**: `@azure/core-client` is removed from `package.json`
 6. **Workarounds**: `WORKAROUNDS.md` entries all have status "fixed" with proper emitter/Core fixes
 
@@ -182,7 +178,7 @@ All scripts source `config.env` automatically. Available in `scripts/`:
 | `build-emitter.sh` | Build the typespec-ts emitter |
 | `generate-sdk.sh` | Run tsp-client with local emitter |
 | `build-sdk.sh` | Build the SDK package |
-| `test-sdk.sh` | Run recorded or live tests |
+| `test-sdk.sh` | Run recorded tests then live tests |
 | `regen-and-test.sh` | Full cycle: build emitter → generate → build SDK → test |
 | `backup-generated.sh` | Snapshot current generated code |
 | `compare-generated.sh` | Diff backed-up vs current generated code |

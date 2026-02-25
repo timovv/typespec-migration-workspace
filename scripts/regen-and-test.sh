@@ -19,8 +19,8 @@ echo "Step 3/4: Building SDK..."
 "${SCRIPT_DIR}/build-sdk.sh"
 echo ""
 
-echo "Step 4/4: Running recorded tests..."
-"${SCRIPT_DIR}/test-sdk.sh" recorded
+echo "Step 4/4: Running tests..."
+"${SCRIPT_DIR}/test-sdk.sh"
 echo ""
 
 echo "=== ✓ Full cycle completed ==="
